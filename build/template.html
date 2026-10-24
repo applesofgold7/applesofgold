@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Bible Games</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f8a8c">
 <style>
 :root{--bg:#f2f8f8;--surface:#fff;--ink:#16302f;--muted:#5b7473;--line:#cfe0df;--accent:#0f8a8c;--bad:#b3402f}
 @media (prefers-color-scheme:dark){:root{--bg:#0f1a1b;--surface:#172526;--ink:#e2f0ef;--muted:#93aeac;--line:#2c4142;--accent:#4fd1c5;--bad:#ef8a78}}
@@ -46,7 +51,9 @@ async function open(raw){
   const key=await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]);
   const z=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(LOCK.iv)},key,b64(LOCK.data));
   const html=await new Response(new Blob([z]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text();
-  document.open(); document.write(html); document.close();
+  /* Keep the site icon and app details when the unlocked page replaces this one */
+  const keep=[...document.querySelectorAll('link[rel~="icon"],link[rel="apple-touch-icon"],link[rel="manifest"],meta[name="theme-color"]')].map(e=>e.outerHTML).join("");
+  document.open(); document.write(html.replace(/<head>/i,"<head>"+keep)); document.close();
 }
 const toB64=u=>{ let s=""; u.forEach(b=>s+=String.fromCharCode(b)); return btoa(s); };
 (async()=>{
